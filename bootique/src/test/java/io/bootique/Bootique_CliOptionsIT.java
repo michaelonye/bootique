@@ -177,6 +177,18 @@ public class Bootique_CliOptionsIT {
         assertEquals("x_y", String.join("_", cli.optionStrings("long")));
     }
 
+    @Test(expected = AssertionError.class)
+    public void testDefaultCommandDefaultOptions() {
+        BQRuntime runtime = runtimeFactory.app()
+                .module(binder -> BQCoreModule.extend(binder).setDefaultCommand(TestCommandDefaultOption.class))
+                .createRuntime();
+
+
+        Cli cli = runtime.getInstance(Cli.class);
+
+        assertEquals("optValue", cli.optionString(TestCommandDefaultOption.OPT));
+    }
+
     @Test
     public void testOption_OverrideConfig() {
         BQRuntime runtime = runtimeFactory.app("--config=classpath:io/bootique/config/test4.yml", "--opt-1=x")
@@ -369,10 +381,12 @@ public class Bootique_CliOptionsIT {
         }
     }
 
-    static final class XeCommand extends CommandWithMetadata {
+    static final class TestCommandDefaultOption extends CommandWithMetadata {
+        public final static String OPT = "opt";
 
-        public XeCommand() {
-            super(CommandMetadata.builder("xe").addOption(OptionMetadata.builder("opt1").build()));
+        public TestCommandDefaultOption() {
+            super(CommandMetadata.builder("testCommandDefaultOption")
+                    .addOption(OptionMetadata.builder(OPT).defaultValue("optValue").build()));
         }
 
         @Override
